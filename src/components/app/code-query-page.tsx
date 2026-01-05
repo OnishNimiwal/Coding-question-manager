@@ -202,11 +202,15 @@ export default function CodeQueryPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 <Code2 className="h-8 w-8 text-primary" />
                 <h1 className="text-2xl font-bold tracking-tight">CodeQuery</h1>
-              </div>
+              </Link>
               <nav className="hidden md:flex items-center gap-4">
+                 <Link href="/search" className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-foreground/80">
+                    <Search className="h-4 w-4" />
+                    Search
+                </Link>
                  <Link href="/my-list" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground">
                     <List className="h-4 w-4" />
                     My List

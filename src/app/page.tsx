@@ -1,5 +1,5 @@
-import CodeQueryPage from '@/components/app/code-query-page';
+import LandingPage from '@/components/app/landing-page';
 
 export default function Home() {
-  return <CodeQueryPage />;
+  return <LandingPage />;
 }

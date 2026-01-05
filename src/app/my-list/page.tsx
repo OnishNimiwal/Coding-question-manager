@@ -3,7 +3,7 @@
 
 import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
-import { Code2, List, Star, LogIn, FilterX } from 'lucide-react';
+import { Code2, List, LogIn, FilterX } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { collection, query, where } from 'firebase/firestore';
@@ -218,7 +218,7 @@ export default function MyListPage() {
                          <div className="cursor-pointer" onClick={() => setActiveFilter('important')}>
                             <ImportanceChart data={stats.importanceDistribution} />
                         </div>
-                        <div onClick={() => setActiveFilter(activeFilter === 'solved' ? 'all' : 'solved')} className="cursor-pointer">
+                        <div className="cursor-pointer" onClick={() => setActiveFilter(activeFilter === 'solved' ? 'all' : 'solved')}>
                             <StatusChart data={stats.statusDistribution} onSegmentClick={setActiveFilter} />
                         </div>
                         <DifficultyChart data={stats.byDifficulty} />
@@ -264,7 +264,7 @@ export default function MyListPage() {
                     Go to the main page to search for questions and add them to your list.
                 </p>
                 <Button asChild>
-                    <Link href="/">
+                    <Link href="/search">
                         <Code2 className="mr-2 h-4 w-4" />
                         Find Questions
                     </Link>
@@ -284,6 +284,10 @@ export default function MyListPage() {
                             <h1 className="text-2xl font-bold tracking-tight">CodeQuery</h1>
                         </Link>
                         <nav className="hidden md:flex items-center gap-4">
+                            <Link href="/search" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+                                <Code2 className="h-4 w-4" />
+                                Search
+                            </Link>
                             <Link href="/my-list" className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-foreground/80">
                                 <List className="h-4 w-4" />
                                 My List
@@ -301,7 +305,7 @@ export default function MyListPage() {
                     <h1 className="text-3xl font-bold">My Question List</h1>
                      {user && !questionsLoading && questions && questions.length > 0 && (
                         <Button asChild variant="outline">
-                            <Link href="/">
+                            <Link href="/search">
                                 <Code2 className="mr-2 h-4 w-4" />
                                 Add More Questions
                             </Link>
