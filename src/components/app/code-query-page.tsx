@@ -4,13 +4,17 @@
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { searchAction, type ActionState } from '@/app/actions';
+import { useUser } from '@/firebase';
+import { addQuestionToList } from '@/firebase/firestore/mutations';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { QuestionCard } from '@/components/app/question-card';
 import { FilterSection } from '@/components/app/filter-section';
 import { QuestionSkeleton } from '@/components/app/question-skeleton';
-import { Code2, Layers, Loader2, Search, Inbox, ListFilter, Cpu } from 'lucide-react';
+import { Code2, Layers, Loader2, Search, Inbox, ListFilter, Cpu, List, LogIn, User } from 'lucide-react';
+import Link from 'next/link';
 import {
   Sheet,
   SheetContent,
@@ -19,6 +23,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 const initialState: ActionState = {
   questions: [],
@@ -43,6 +57,8 @@ const ALL_TOPICS = [
 export default function CodeQueryPage() {
   const [state, formAction, isPending] = useActionState(searchAction, initialState);
   const { toast } = useToast();
+  const { user, loading: userLoading } = useUser();
+  const auth = getAuth();
 
   const [platformFilters, setPlatformFilters] = useState<string[]>([]);
   const [difficultyFilters, setDifficultyFilters] = useState<string[]>([]);
@@ -76,6 +92,38 @@ export default function CodeQueryPage() {
     setTopicFilters([]);
   }, [state.questions]);
 
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Error signing in with Google", error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Could not sign you in. Please try again.",
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      console.error("Error signing out", error);
+    }
+  };
+
+  const handleAddToList = (question: any) => {
+    if (!user) {
+        toast({ title: 'Please sign in', description: 'You need to be signed in to add questions to your list.' });
+        return;
+    }
+    addQuestionToList(user.uid, question);
+    toast({ title: 'Success', description: `"${question.title}" has been added to your list.` });
+  };
+
+
   const Filters = () => (
     <div className="space-y-4">
       <FilterSection
@@ -102,14 +150,67 @@ export default function CodeQueryPage() {
     </div>
   );
 
+  const UserButton = () => {
+    if (userLoading) {
+      return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
+    }
+
+    if (!user) {
+      return (
+        <Button onClick={handleLogin} variant="outline" size="sm">
+          <LogIn className="mr-2 h-4 w-4" />
+          Login
+        </Button>
+      );
+    }
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
+              <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{user.displayName}</p>
+              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>
+            <User className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Code2 className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold tracking-tight">CodeQuery</h1>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Code2 className="h-8 w-8 text-primary" />
+                <h1 className="text-2xl font-bold tracking-tight">CodeQuery</h1>
+              </div>
+              <nav className="hidden md:flex items-center gap-4">
+                 <Link href="/my-list" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+                    <List className="h-4 w-4" />
+                    My List
+                </Link>
+              </nav>
+            </div>
+             <div className="flex items-center gap-2">
+                <UserButton />
             </div>
           </div>
         </div>
@@ -186,7 +287,14 @@ export default function CodeQueryPage() {
                 <>
                 {filteredQuestions.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {filteredQuestions.map((q, i) => <QuestionCard key={`${q.link}-${i}`} question={q} />)}
+                        {filteredQuestions.map((q, i) => (
+                          <QuestionCard 
+                            key={`${q.link}-${i}`} 
+                            question={q}
+                            onAddToList={() => handleAddToList(q)}
+                            isAuth={!!user}
+                          />
+                        ))}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-center py-16 border rounded-lg bg-card">
