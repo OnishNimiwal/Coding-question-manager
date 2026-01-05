@@ -3,7 +3,7 @@
 
 import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
-import { Code2, List, User, LogIn, CheckCircle, Star, Target } from 'lucide-react';
+import { Code2, List, User, LogIn, CheckCircle, Star } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { collection, query, where } from 'firebase/firestore';
@@ -23,6 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatsCard } from '@/components/app/stats-card';
 import { DifficultyChart } from '@/components/app/difficulty-chart';
+import { StatusChart } from '@/components/app/status-chart';
+import { NotesOverview } from '@/components/app/notes-overview';
 import { useMemo } from 'react';
 
 
@@ -40,7 +42,7 @@ export default function MyListPage() {
     const { data: questions, isLoading: questionsLoading } = useCollection(questionsQuery);
 
     const stats = useMemo(() => {
-        if (!questions) return { total: 0, solved: 0, important: 0, unsolved: 0, byDifficulty: [] };
+        if (!questions) return { total: 0, solved: 0, important: 0, unsolved: 0, byDifficulty: [], statusDistribution: [] };
     
         const total = questions.length;
         const solved = questions.filter(q => q.status === 'solved').length;
@@ -57,8 +59,13 @@ export default function MyListPage() {
             }
             return acc;
         }, [] as { name: string; value: number }[]);
+
+        const statusDistribution = [
+            { name: 'Solved', value: solved, fill: 'hsl(var(--chart-2))' },
+            { name: 'Unsolved', value: unsolved, fill: 'hsl(var(--chart-1))' },
+        ];
     
-        return { total, solved, important, unsolved, byDifficulty };
+        return { total, solved, important, unsolved, byDifficulty, statusDistribution };
     }, [questions]);
 
     const handleLogin = async () => {
@@ -158,6 +165,7 @@ export default function MyListPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                        {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 rounded-lg" />)}
                     </div>
+                    <Skeleton className="h-40 w-full mb-8" />
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {Array.from({ length: 3 }).map((_, i) => (
                             <Skeleton key={i} className="h-80 rounded-lg" />
@@ -170,13 +178,14 @@ export default function MyListPage() {
         if (questions && questions.length > 0) {
             return (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <StatsCard title="Total Questions" value={stats.total} icon={<List />} />
-                        <StatsCard title="Solved" value={stats.solved} icon={<CheckCircle />} description={`${Math.round(stats.total > 0 ? (stats.solved / stats.total) * 100 : 0)}% completed`} />
                         <StatsCard title="Important" value={stats.important} icon={<Star />} />
+                        <StatusChart data={stats.statusDistribution} />
                         <DifficultyChart data={stats.byDifficulty} />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <NotesOverview questions={questions} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                         {questions.map((q) => (
                             <MyListCard key={q.id} question={q} />
                         ))}
