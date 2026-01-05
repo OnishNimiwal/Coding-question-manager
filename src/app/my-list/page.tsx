@@ -1,7 +1,9 @@
 
 'use client';
 
-import { useUser, useFirestore, useCollection } from '@/firebase';
+import { useUser } from '@/firebase';
+import { useFirestore } from '@/firebase';
+import { useCollection } from '@/firebase';
 import { Code2, List, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
