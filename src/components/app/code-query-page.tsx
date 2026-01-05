@@ -163,7 +163,7 @@ export default function CodeQueryPage() {
       return (
         <Button onClick={handleLogin} variant="outline" size="sm">
           <LogIn className="mr-2 h-4 w-4" />
-          Login
+          Login with Google
         </Button>
       );
     }
