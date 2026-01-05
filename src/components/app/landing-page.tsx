@@ -93,19 +93,17 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-16 items-center justify-between">
+            <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                 <Link href="/" className="flex items-center gap-2">
                     <Code2 className="h-8 w-8 text-primary" />
                     <h1 className="text-2xl font-bold tracking-tight">CodeQuery</h1>
                 </Link>
                 <div className="flex items-center gap-4">
-                    <nav className="hidden md:flex items-center gap-4">
-                        <Link href="/search" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground">
-                            <Search className="h-4 w-4" />
+                    <nav className="hidden md:flex items-center gap-6">
+                        <Link href="/search" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                             Search
                         </Link>
-                        <Link href="/my-list" className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground">
-                            <List className="h-4 w-4" />
+                        <Link href="/my-list" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                             My List
                         </Link>
                     </nav>
@@ -117,7 +115,7 @@ export default function LandingPage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-20 sm:py-28 md:py-32">
-          <div className="container text-center">
+          <div className="container px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary">
               Find, Track, and Master Any Coding Problem
             </h1>
@@ -134,10 +132,15 @@ export default function LandingPage() {
 
         {/* Features Section */}
         <section id="features" className="py-16 sm:py-20 bg-muted/50">
-          <div className="container">
-            <h2 className="text-3xl font-bold text-center mb-12">Why You'll Love CodeQuery</h2>
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              <div className="flex flex-col items-center">
+          <div className="container px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Why You'll Love CodeQuery</h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                    Everything you need to stay organized and motivated in your coding journey.
+                </p>
+            </div>
+            <div className="mx-auto mt-12 grid max-w-lg gap-8 md:max-w-none md:grid-cols-3">
+              <div className="flex flex-col items-center text-center">
                 <div className="p-4 bg-primary/10 rounded-full mb-4">
                     <Search className="h-8 w-8 text-primary" />
                 </div>
@@ -146,7 +149,7 @@ export default function LandingPage() {
                   Describe the problem you want to solve, and our AI will find the most relevant questions from a vast array of platforms.
                 </p>
               </div>
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center text-center">
                 <div className="p-4 bg-primary/10 rounded-full mb-4">
                     <List className="h-8 w-8 text-primary" />
                 </div>
@@ -155,7 +158,7 @@ export default function LandingPage() {
                   Save questions to your personal list, mark them as important, and track their status (solved or unsolved).
                 </p>
               </div>
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center text-center">
                  <div className="p-4 bg-primary/10 rounded-full mb-4">
                     <BarChart className="h-8 w-8 text-primary" />
                 </div>
@@ -170,9 +173,14 @@ export default function LandingPage() {
 
         {/* Sample Charts Section */}
         <section className="py-16 sm:py-20">
-            <div className="container">
-                <h2 className="text-3xl font-bold text-center mb-12">Powerful Dashboard at a Glance</h2>
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="container px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl text-center">
+                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Powerful Dashboard at a Glance</h2>
+                    <p className="mt-4 text-lg text-muted-foreground">
+                        Get an instant overview of your saved questions and progress.
+                    </p>
+                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
                     <DifficultyChart data={sampleDifficultyData} />
                     <StatusChart data={sampleStatusData} onSegmentClick={() => {}} />
                     <ImportanceChart data={sampleImportanceData} />
@@ -182,9 +190,9 @@ export default function LandingPage() {
 
          {/* Sample Searches Section */}
         <section className="py-16 sm:py-20 bg-muted/50">
-            <div className="container text-center">
-                 <h2 className="text-3xl font-bold mb-8">Ready to Find Your Next Challenge?</h2>
-                 <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+            <div className="container px-4 sm:px-6 lg:px-8 text-center">
+                 <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">Ready to Find Your Next Challenge?</h2>
+                 <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
                     Click on any topic to see what CodeQuery can find for you.
                  </p>
                  <div className="flex flex-wrap justify-center gap-3">
@@ -202,7 +210,7 @@ export default function LandingPage() {
       </main>
 
        <footer className="py-6 border-t">
-            <div className="container flex items-center justify-between">
+            <div className="container flex flex-col items-center justify-between gap-4 sm:flex-row px-4 sm:px-6 lg:px-8">
                 <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} CodeQuery. All rights reserved.</p>
                 <div className="flex items-center gap-4">
                      <Link href="/search" className="text-sm text-muted-foreground hover:text-foreground">
