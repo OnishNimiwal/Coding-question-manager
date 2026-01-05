@@ -1,96 +1,114 @@
 {
-    "entities": {
-        "UserProfile": {
-            "title": "User Profile",
-            "description": "Represents a user's profile in the system.",
-            "type": "object",
-            "properties": {
-                "uid": {
-                    "type": "string",
-                    "description": "The unique identifier for the user."
-                },
-                "email": {
-                    "type": "string",
-                    "format": "email",
-                    "description": "The user's email address."
-                },
-                "displayName": {
-                    "type": "string",
-                    "description": "The user's display name."
-                },
-                "photoURL": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "URL of the user's profile picture."
-                }
-            },
-            "required": ["uid", "email"]
+  "entities": {
+    "CodingQuestion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CodingQuestion",
+      "type": "object",
+      "description": "Represents a coding question from a specific platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CodingQuestion entity."
         },
-        "UserQuestion": {
-            "title": "User Question",
-            "description": "A coding question saved by a user.",
-            "type": "object",
-            "properties": {
-                "userId": {
-                    "type": "string",
-                    "description": "The ID of the user who saved the question."
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "link": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "platform": {
-                    "type": "string"
-                },
-                "difficulty": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string",
-                    "enum": ["unsolved", "solved"],
-                    "description": "The user's progress on the question."
-                },
-                "isImportant": {
-                    "type": "boolean",
-                    "description": "Whether the user has marked the question as important."
-                },
-                "notes": {
-                    "type": "string",
-                    "description": "User's personal notes on the question."
-                },
-                "createdAt": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "updatedAt": {
-                    "type": "string",
-                    "format": "date-time"
-                }
-            },
-            "required": ["userId", "title", "link", "platform", "difficulty", "status"]
-        }
-    },
-    "auth": {
-        "providers": ["google.com"]
-    },
-    "firestore": {
-        "/users/{userId}": {
-            "schema": {
-                "$ref": "#/entities/UserProfile"
-            },
-            "description": "Stores user profile information."
+        "platformId": {
+          "type": "string",
+          "description": "Reference to the CodingPlatform. (Relationship: CodingPlatform 1:N CodingQuestion)"
         },
-        "/userQuestions/{questionId}": {
-            "schema": {
-                "$ref": "#/entities/UserQuestion"
-            },
-            "description": "Stores questions saved by users."
+        "title": {
+          "type": "string",
+          "description": "Title of the coding question."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the coding question."
+        },
+        "link": {
+          "type": "string",
+          "description": "Link to the coding question on the original platform.",
+          "format": "uri"
+        },
+        "difficulty": {
+          "type": "string",
+          "description": "Difficulty level of the coding question (e.g., Easy, Medium, Hard)."
         }
+      },
+      "required": [
+        "id",
+        "platformId",
+        "title",
+        "description",
+        "link",
+        "difficulty"
+      ]
+    },
+    "CodingPlatform": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CodingPlatform",
+      "type": "object",
+      "description": "Represents a coding platform (e.g., LeetCode, Codeforces).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CodingPlatform entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the coding platform."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the coding platform.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "url"
+      ]
     }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/codingPlatforms/{platformId}",
+        "definition": {
+          "entityName": "CodingPlatform",
+          "schema": {
+            "$ref": "#/backend/entities/CodingPlatform"
+          },
+          "description": "Stores information about coding platforms (e.g., LeetCode, Codeforces).",
+          "params": [
+            {
+              "name": "platformId",
+              "description": "Unique identifier for the coding platform."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/codingQuestions/{questionId}",
+        "definition": {
+          "entityName": "CodingQuestion",
+          "schema": {
+            "$ref": "#/backend/entities/CodingQuestion"
+          },
+          "description": "Stores coding questions from various platforms.",
+          "params": [
+            {
+              "name": "questionId",
+              "description": "Unique identifier for the coding question."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to store coding platforms and coding questions. Since the application focuses on searching and displaying coding questions from different platforms, the structure prioritizes efficient retrieval and filtering of this data. The structure uses simple collections for coding platforms and coding questions. Authorization independence is not a major concern here as there is no user-specific or private data to consider, since there's no user or private related entities, so security rules are very basic and don't rely on denormalization. List operations are supported efficiently since each collection represents a single entity and are flat (no subcollections)."
+  }
 }

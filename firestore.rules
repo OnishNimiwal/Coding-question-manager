@@ -1,0 +1,90 @@
+/**
+ * Core Philosophy:
+ * This ruleset establishes a public, read-only data catalog model. The primary goal is to
+ * allow any user, whether authenticated or anonymous, to freely browse and query all
+ * coding platforms and questions. This supports the application's core feature of
+ * searching and displaying this information.
+ *
+ * Data Structure:
+ * The data is organized into two distinct, top-level collections:
+ * 1. /codingPlatforms/{platformId}: Contains documents for platforms like LeetCode.
+ * 2. /codingQuestions/{questionId}: Contains documents for individual coding problems.
+ * This flat structure is simple and optimized for public list and get operations.
+ *
+ * Key Security Decisions:
+ * - Public Read Access: All data in both collections is publicly readable.
+ *   `get` and `list` operations are permitted for everyone to ensure the application's
+ *   UI can function correctly for all visitors.
+ * - Restricted Writes: All write operations (create, update, delete) are explicitly
+ *   denied. This is the most secure default posture, as the provided schema does not
+ *   include an admin role or an ownership model for managing this catalog data. It
+ *   effectively makes the database read-only from the client-side, preventing any
+ *   unauthorized modifications. Future implementation of an admin panel would require
+ *   revisiting these write rules, likely using Firebase Auth Custom Claims.
+ *
+ * Denormalization for Authorization:
+ * Denormalization is not required for this security model. Since all data is public
+ * and writes are disallowed, there are no complex authorization checks that would
+ * benefit from copied data.
+ *
+ * Structural Segregation:
+ * This principle is not applicable, as all data is intended to be public. There is
+ * no mix of private and public content within the same collection.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------------
+    // Helper Functions
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    // Collection Rules
+    // ------------------------------------------------------------------------
+
+    /**
+     * @description
+     *   Manages the collection of coding platforms. This data is considered public
+     *   and read-only for all users.
+     * @path
+     *   /codingPlatforms/{platformId}
+     * @allow
+     *   Any user, signed-in or not, to read a list of platforms. `(list)`
+     * @deny
+     *   Any user attempting to create, update, or delete a platform. `(create, update, delete)`
+     * @principle
+     *   Public read for catalog data; writes are restricted pending an admin implementation.
+     */
+    match /codingPlatforms/{platformId} {
+      allow get: if true;
+      allow list: if true;
+
+      allow create: if false; // TODO: Implement admin-only access, possibly via custom claims.
+      allow update: if false; // TODO: Implement admin-only access, possibly via custom claims.
+      allow delete: if false; // TODO: Implement admin-only access, possibly via custom claims.
+    }
+
+    /**
+     * @description
+     *   Manages the collection of coding questions. This data is considered public
+     *   and read-only for all users.
+     * @path
+     *   /codingQuestions/{questionId}
+     * @allow
+     *   Any user, signed-in or not, to read the details of a specific question. `(get)`
+     * @deny
+     *   Any user attempting to create, update, or delete a question. `(create, update, delete)`
+     * @principle
+     *   Public read for catalog data; writes are restricted pending an admin implementation.
+     */
+    match /codingQuestions/{questionId} {
+      allow get: if true;
+      allow list: if true;
+
+      allow create: if false; // TODO: Implement admin-only access, possibly via custom claims.
+      allow update: if false; // TODO: Implement admin-only access, possibly via custom claims.
+      allow delete: if false; // TODO: Implement admin-only access, possibly via custom claims.
+    }
+  }
+}
