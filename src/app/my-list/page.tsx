@@ -96,7 +96,8 @@ export default function MyListPage() {
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-        } catch (error: any) {
+        } catch (error: any)
+{
             console.error("Error signing in with Google", error);
             let description = "Could not sign you in. Please try again.";
             if (error.code === 'auth/operation-not-allowed') {
@@ -214,8 +215,8 @@ export default function MyListPage() {
                         <div onClick={() => setActiveFilter('all')} className="cursor-pointer">
                             <StatsCard title="Total Questions" value={stats.total} icon={<List />} />
                         </div>
-                        <div onClick={() => setActiveFilter('important')} className="cursor-pointer">
-                           <ImportanceChart data={stats.importanceDistribution} />
+                         <div className="cursor-pointer" onClick={() => setActiveFilter('important')}>
+                            <ImportanceChart data={stats.importanceDistribution} />
                         </div>
                         <div onClick={() => setActiveFilter(activeFilter === 'solved' ? 'all' : 'solved')} className="cursor-pointer">
                             <StatusChart data={stats.statusDistribution} onSegmentClick={setActiveFilter} />

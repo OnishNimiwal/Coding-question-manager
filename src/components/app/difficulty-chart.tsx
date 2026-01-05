@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/card';
 import {
   ChartContainer,
-  ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
 
@@ -87,7 +86,7 @@ export function DifficultyChart({ data }: DifficultyChartProps) {
                         tickMargin={8}
                         allowDecimals={false}
                     />
-                    <ChartTooltip
+                    <ChartTooltipContent
                         cursor={false}
                         content={<ChartTooltipContent indicator="dot" />}
                     />
