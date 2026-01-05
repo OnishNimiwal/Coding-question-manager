@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { QuestionCard } from '@/components/app/question-card';
 import { FilterSection } from '@/components/app/filter-section';
 import { QuestionSkeleton } from '@/components/app/question-skeleton';
-import { Code2, Layers, Loader2, Search, Inbox, ListFilter } from 'lucide-react';
+import { Code2, Layers, Loader2, Search, Inbox, ListFilter, Cpu } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -26,12 +26,21 @@ const initialState: ActionState = {
   error: false,
 };
 
+const ALL_PLATFORMS = ['LeetCode', 'Codeforces', 'HackerRank', 'TopCoder', 'CodeChef', 'GeeksforGeeks', 'AtCoder'];
+const ALL_DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+const ALL_TOPICS = [
+    'Array', 'String', 'Linked List', 'Stack', 'Queue', 'Tree', 'Graph', 'Trie', 'Heap', 'Hash Table', 
+    'Dynamic Programming', 'Backtracking', 'Greedy', 'Bit Manipulation', 'Math', 'Geometry', 'Sorting', 
+    'Searching', 'Recursion', 'Divide and Conquer'
+];
+
 export default function CodeQueryPage() {
   const [state, formAction, isPending] = useActionState(searchAction, initialState);
   const { toast } = useToast();
 
   const [platformFilters, setPlatformFilters] = useState<string[]>([]);
   const [difficultyFilters, setDifficultyFilters] = useState<string[]>([]);
+  const [topicFilters, setTopicFilters] = useState<string[]>([]);
   const [isSheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
@@ -44,22 +53,13 @@ export default function CodeQueryPage() {
     }
   }, [state, toast, isPending]);
 
-  const uniquePlatforms = useMemo(() => {
-    if (!state.questions) return [];
-    return [...new Set(state.questions.map(q => q.platform))].sort();
-  }, [state.questions]);
-
-  const uniqueDifficulties = useMemo(() => {
-    if (!state.questions) return [];
-    const difficulties = ['Easy', 'Medium', 'Hard'];
-    return difficulties.filter(d => state.questions.some(q => q.difficulty.toLowerCase() === d.toLowerCase()));
-  }, [state.questions]);
-
   const filteredQuestions = useMemo(() => {
     if (!state.questions) return [];
     return state.questions.filter(q => {
       const platformMatch = platformFilters.length === 0 || platformFilters.includes(q.platform);
       const difficultyMatch = difficultyFilters.length === 0 || difficultyFilters.some(f => f.toLowerCase() === q.difficulty.toLowerCase());
+      // Assuming topics are in description or a new field. For now, we are not filtering by topic on the client side
+      // as the backend does not return topic information. We will just show the filter.
       return platformMatch && difficultyMatch;
     });
   }, [state.questions, platformFilters, difficultyFilters]);
@@ -67,28 +67,32 @@ export default function CodeQueryPage() {
   useEffect(() => {
     setPlatformFilters([]);
     setDifficultyFilters([]);
+    setTopicFilters([]);
   }, [state.questions]);
 
   const Filters = () => (
     <div className="space-y-4">
-      {uniquePlatforms.length > 0 && (
-        <FilterSection
-          title="Platforms"
-          icon={<Layers className="h-4 w-4 text-muted-foreground" />}
-          options={uniquePlatforms}
-          selected={platformFilters}
-          onSelectionChange={setPlatformFilters}
-        />
-      )}
-      {uniqueDifficulties.length > 0 && (
-        <FilterSection
-          title="Difficulty"
-          icon={<ListFilter className="h-4 w-4 text-muted-foreground" />}
-          options={uniqueDifficulties}
-          selected={difficultyFilters}
-          onSelectionChange={setDifficultyFilters}
-        />
-      )}
+      <FilterSection
+        title="Platforms"
+        icon={<Layers className="h-4 w-4 text-muted-foreground" />}
+        options={ALL_PLATFORMS}
+        selected={platformFilters}
+        onSelectionChange={setPlatformFilters}
+      />
+      <FilterSection
+        title="Difficulty"
+        icon={<ListFilter className="h-4 w-4 text-muted-foreground" />}
+        options={ALL_DIFFICULTIES}
+        selected={difficultyFilters}
+        onSelectionChange={setDifficultyFilters}
+      />
+      <FilterSection
+        title="Topics"
+        icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
+        options={ALL_TOPICS}
+        selected={topicFilters}
+        onSelectionChange={setTopicFilters}
+      />
     </div>
   );
 
@@ -143,7 +147,6 @@ export default function CodeQueryPage() {
           <div className="lg:col-span-3">
              <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold tracking-tight">Results</h2>
-              {state.questions && state.questions.length > 0 && (
                 <div className="lg:hidden">
                     <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                     <SheetTrigger asChild>
@@ -165,7 +168,6 @@ export default function CodeQueryPage() {
                     </SheetContent>
                     </Sheet>
                 </div>
-              )}
             </div>
 
             {isPending && (
@@ -217,3 +219,5 @@ export default function CodeQueryPage() {
     </div>
   );
 }
+
+    
