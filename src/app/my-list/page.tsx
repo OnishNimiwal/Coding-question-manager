@@ -2,13 +2,12 @@
 'use client';
 
 import { useUser } from '@/firebase/auth/use-user';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useMemoFirebase } from '@/firebase';
 import { useCollection } from '@/firebase';
 import { Code2, List, User, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { collection, query, where } from 'firebase/firestore';
-import { useMemo } from 'react';
 import { MyListCard } from '@/components/app/my-list-card';
 
 import {
@@ -31,7 +30,7 @@ export default function MyListPage() {
     const auth = getAuth();
     const { toast } = useToast();
 
-    const questionsQuery = useMemo(() => {
+    const questionsQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
         return query(collection(firestore, 'userQuestions'), where('userId', '==', user.uid));
     }, [user, firestore]);
