@@ -22,6 +22,7 @@ export function MyListCard({ question }: { question: any }) {
   const [notes, setNotes] = useState(question.notes || '');
 
   const getDifficultyBadgeVariant = (difficulty: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    if (!difficulty) return 'outline';
     switch (difficulty.toLowerCase()) {
       case 'easy': return 'secondary';
       case 'medium': return 'default';
@@ -65,7 +66,7 @@ export function MyListCard({ question }: { question: any }) {
 
 
   return (
-    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300 bg-card/50 hover:bg-card">
       <CardHeader>
         <div className="flex justify-between items-start">
             <CardTitle className="text-lg font-semibold leading-snug pr-2">{question.title}</CardTitle>
@@ -76,7 +77,7 @@ export function MyListCard({ question }: { question: any }) {
         <div className="flex flex-wrap gap-2 pt-2">
           <Badge variant="outline">{question.platform}</Badge>
           <Badge variant={getDifficultyBadgeVariant(question.difficulty)} className="capitalize">
-            {question.difficulty}
+            {question.difficulty || 'N/A'}
           </Badge>
           <Badge variant={statusInfo.variant} className="capitalize flex items-center gap-1">
             {statusInfo.icon} {statusInfo.label}
@@ -103,7 +104,7 @@ export function MyListCard({ question }: { question: any }) {
                      </div>
                 </div>
             ) : (
-                <p className="text-sm text-muted-foreground p-2 bg-muted/50 rounded-md min-h-[60px]">
+                <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md min-h-[60px] whitespace-pre-wrap">
                     {question.notes || 'No notes yet.'}
                 </p>
             )}

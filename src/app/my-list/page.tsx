@@ -2,9 +2,8 @@
 'use client';
 
 import { useUser } from '@/firebase/auth/use-user';
-import { useFirestore, useMemoFirebase } from '@/firebase';
-import { useCollection } from '@/firebase';
-import { Code2, List, User, LogIn } from 'lucide-react';
+import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { Code2, List, User, LogIn, CheckCircle, Star, Target } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { collection, query, where } from 'firebase/firestore';
@@ -22,6 +21,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatsCard } from '@/components/app/stats-card';
+import { DifficultyChart } from '@/components/app/difficulty-chart';
+import { useMemo } from 'react';
 
 
 export default function MyListPage() {
@@ -35,7 +37,29 @@ export default function MyListPage() {
         return query(collection(firestore, 'userQuestions'), where('userId', '==', user.uid));
     }, [user, firestore]);
 
-    const { data: questions, loading: questionsLoading } = useCollection(questionsQuery);
+    const { data: questions, isLoading: questionsLoading } = useCollection(questionsQuery);
+
+    const stats = useMemo(() => {
+        if (!questions) return { total: 0, solved: 0, important: 0, unsolved: 0, byDifficulty: [] };
+    
+        const total = questions.length;
+        const solved = questions.filter(q => q.status === 'solved').length;
+        const important = questions.filter(q => q.isImportant).length;
+        const unsolved = total - solved;
+
+        const byDifficulty = questions.reduce((acc, q) => {
+            const difficulty = q.difficulty || 'N/A';
+            const existing = acc.find(item => item.name === difficulty);
+            if (existing) {
+                existing.value += 1;
+            } else {
+                acc.push({ name: difficulty, value: 1 });
+            }
+            return acc;
+        }, [] as { name: string; value: number }[]);
+    
+        return { total, solved, important, unsolved, byDifficulty };
+    }, [questions]);
 
     const handleLogin = async () => {
         const provider = new GoogleAuthProvider();
@@ -46,6 +70,8 @@ export default function MyListPage() {
             let description = "Could not sign you in. Please try again.";
             if (error.code === 'auth/operation-not-allowed') {
                 description = "Google Sign-In is not enabled for this project. Please enable it in the Firebase console.";
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                description = "Sign-in cancelled. Please try again.";
             }
             toast({
                 variant: "destructive",
@@ -65,7 +91,7 @@ export default function MyListPage() {
     
     const UserButton = () => {
         if (userLoading) {
-          return <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />;
+          return <Skeleton className="h-9 w-9 rounded-full" />;
         }
     
         if (!user) {
@@ -103,38 +129,64 @@ export default function MyListPage() {
           </DropdownMenu>
         );
       };
-
+      
     const renderContent = () => {
-        if (userLoading || (user && questionsLoading)) {
+        if (userLoading) {
             return (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-64 rounded-lg" />
-                    ))}
+                <div className="text-center p-8">
+                    <p>Loading your list...</p>
                 </div>
             );
         }
 
         if (!user) {
             return (
-                <div className="text-center">
-                    <p className="mb-4">Please log in to see your list of questions.</p>
+                <div className="text-center border-2 border-dashed border-muted-foreground/30 rounded-lg py-16 mt-8">
+                    <h2 className="text-xl font-semibold mb-2">Please log in</h2>
+                    <p className="text-muted-foreground mb-4">Log in to see your list of saved questions.</p>
+                     <Button onClick={handleLogin}>
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Login with Google
+                    </Button>
                 </div>
+            );
+        }
+
+        if (questionsLoading) {
+            return (
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                       {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 rounded-lg" />)}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-80 rounded-lg" />
+                        ))}
+                    </div>
+                </>
             );
         }
 
         if (questions && questions.length > 0) {
             return (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {questions.map((q) => (
-                        <MyListCard key={q.id} question={q} />
-                    ))}
-                </div>
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                        <StatsCard title="Total Questions" value={stats.total} icon={<List />} />
+                        <StatsCard title="Solved" value={stats.solved} icon={<CheckCircle />} description={`${Math.round(stats.total > 0 ? (stats.solved / stats.total) * 100 : 0)}% completed`} />
+                        <StatsCard title="Important" value={stats.important} icon={<Star />} />
+                        <DifficultyChart data={stats.byDifficulty} />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {questions.map((q) => (
+                            <MyListCard key={q.id} question={q} />
+                        ))}
+                    </div>
+                </>
             );
         }
 
         return (
-            <div className="text-center border-2 border-dashed border-muted-foreground/30 rounded-lg py-16">
+            <div className="text-center border-2 border-dashed border-muted-foreground/30 rounded-lg py-16 mt-8">
                 <h2 className="text-xl font-semibold mb-2">Your list is empty</h2>
                 <p className="text-muted-foreground mb-4">
                     Go to the main page to search for questions and add them to your list.
@@ -173,7 +225,17 @@ export default function MyListPage() {
                 </div>
             </header>
             <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-                <h1 className="text-3xl font-bold mb-8">My Question List</h1>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold">My Question List</h1>
+                    {user && !questionsLoading && questions && questions.length > 0 && (
+                        <Button asChild variant="outline">
+                            <Link href="/">
+                                <Code2 className="mr-2 h-4 w-4" />
+                                Add More Questions
+                            </Link>
+                        </Button>
+                    )}
+                </div>
                 {renderContent()}
             </main>
         </div>
