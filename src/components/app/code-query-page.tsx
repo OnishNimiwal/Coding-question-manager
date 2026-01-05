@@ -233,7 +233,7 @@ export default function CodeQueryPage() {
                 required
               />
             </div>
-            <Button type="submit" disabled={isPending} className="h-12 text-base px-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button type="submit" disabled={isPending} size="icon" className="h-12 w-12 rounded-full flex-shrink-0">
               {isPending ? (
                 <Loader2 className="animate-spin" />
               ) : (

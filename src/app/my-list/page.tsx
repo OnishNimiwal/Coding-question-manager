@@ -3,7 +3,7 @@
 
 import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
-import { Code2, List, User, LogIn, CheckCircle, Star } from 'lucide-react';
+import { Code2, List, User, LogIn, Star } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { collection, query, where } from 'firebase/firestore';
@@ -168,7 +168,7 @@ export default function MyListPage() {
                     <Skeleton className="h-40 w-full mb-8" />
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {Array.from({ length: 3 }).map((_, i) => (
-                            <Skeleton key={i} className="h-80 rounded-lg" />
+                            <Skeleton key={i} className="h-96 rounded-lg" />
                         ))}
                     </div>
                 </>
@@ -177,20 +177,23 @@ export default function MyListPage() {
 
         if (questions && questions.length > 0) {
             return (
-                <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <StatsCard title="Total Questions" value={stats.total} icon={<List />} />
                         <StatsCard title="Important" value={stats.important} icon={<Star />} />
                         <StatusChart data={stats.statusDistribution} />
                         <DifficultyChart data={stats.byDifficulty} />
                     </div>
                     <NotesOverview questions={questions} />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                        {questions.map((q) => (
-                            <MyListCard key={q.id} question={q} />
-                        ))}
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight mb-4">Your Questions</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {questions.map((q) => (
+                                <MyListCard key={q.id} question={q} />
+                            ))}
+                        </div>
                     </div>
-                </>
+                </div>
             );
         }
 
@@ -237,7 +240,7 @@ export default function MyListPage() {
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">My Question List</h1>
                     {user && !questionsLoading && questions && questions.length > 0 && (
-                        <Button asChild variant="outline">
+                        <Button asChild>
                             <Link href="/">
                                 <Code2 className="mr-2 h-4 w-4" />
                                 Add More Questions

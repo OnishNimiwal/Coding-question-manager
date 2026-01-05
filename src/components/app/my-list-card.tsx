@@ -66,7 +66,7 @@ export function MyListCard({ question }: { question: any }) {
 
 
   return (
-    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300 bg-card/50 hover:bg-card">
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
         <div className="flex justify-between items-start">
             <CardTitle className="text-lg font-semibold leading-snug pr-2">{question.title}</CardTitle>
@@ -110,7 +110,7 @@ export function MyListCard({ question }: { question: any }) {
             )}
         </div>
       </CardContent>
-      <CardFooter className="flex-col space-y-2 items-stretch">
+      <CardFooter className="flex-col space-y-2 items-stretch mt-auto pt-6">
         <Button asChild size="sm" className="w-full">
           <a href={question.link} target="_blank" rel="noopener noreferrer">
             View Question <ExternalLink className="ml-2 h-4 w-4" />
