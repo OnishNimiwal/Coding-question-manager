@@ -26,12 +26,18 @@ const initialState: ActionState = {
   error: false,
 };
 
-const ALL_PLATFORMS = ['LeetCode', 'Codeforces', 'HackerRank', 'TopCoder', 'CodeChef', 'GeeksforGeeks', 'AtCoder'];
-const ALL_DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+const ALL_PLATFORMS = [
+    'LeetCode', 'HackerRank', 'Codeforces', 'TopCoder', 'CodeChef', 
+    'GeeksforGeeks', 'AtCoder', 'HackerEarth', 'Spoj', 'Project Euler', 
+    'Codewars', 'InterviewBit', 'Exercism', 'URI Online Judge', 'Kattis'
+];
+const ALL_DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Beginner', 'Advanced'];
 const ALL_TOPICS = [
     'Array', 'String', 'Linked List', 'Stack', 'Queue', 'Tree', 'Graph', 'Trie', 'Heap', 'Hash Table', 
     'Dynamic Programming', 'Backtracking', 'Greedy', 'Bit Manipulation', 'Math', 'Geometry', 'Sorting', 
-    'Searching', 'Recursion', 'Divide and Conquer'
+    'Searching', 'Recursion', 'Divide and Conquer', 'Two Pointers', 'Sliding Window', 'Union Find',
+    'Segment Tree', 'Fenwick Tree (Binary Indexed Tree)', 'Topological Sort', 'Minimum Spanning Tree',
+    'Shortest Path', 'String Matching (KMP)', 'Game Theory', 'Computational Geometry'
 ];
 
 export default function CodeQueryPage() {
@@ -219,5 +225,3 @@ export default function CodeQueryPage() {
     </div>
   );
 }
-
-    
