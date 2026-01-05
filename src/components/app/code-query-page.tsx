@@ -4,7 +4,7 @@
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { searchAction, type ActionState } from '@/app/actions';
-import { useUser } from '@/firebase';
+import { useUser } from '@/firebase/auth/use-user';
 import { addQuestionToList } from '@/firebase/firestore/mutations';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
@@ -96,12 +96,16 @@ export default function CodeQueryPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error signing in with Google", error);
+      let description = "Could not sign you in. Please try again.";
+      if (error.code === 'auth/operation-not-allowed') {
+        description = "Google Sign-In is not enabled for this project. Please enable it in the Firebase console.";
+      }
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: "Could not sign you in. Please try again.",
+        description: description,
       });
     }
   };

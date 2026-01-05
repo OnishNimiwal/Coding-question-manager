@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useUser } from '@/firebase';
+import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore } from '@/firebase';
 import { useCollection } from '@/firebase';
 import { Code2, List, User, LogIn } from 'lucide-react';
@@ -42,12 +42,16 @@ export default function MyListPage() {
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error signing in with Google", error);
+            let description = "Could not sign you in. Please try again.";
+            if (error.code === 'auth/operation-not-allowed') {
+                description = "Google Sign-In is not enabled for this project. Please enable it in the Firebase console.";
+            }
             toast({
                 variant: "destructive",
                 title: "Authentication Error",
-                description: "Could not sign you in. Please try again.",
+                description: description,
             });
         }
     };
