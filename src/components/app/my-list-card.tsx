@@ -71,7 +71,7 @@ export function MyListCard({ question }: { question: any }) {
         <div className="flex justify-between items-start">
             <CardTitle className="text-lg font-semibold leading-snug pr-2">{question.title}</CardTitle>
             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleImportanceToggle}>
-                <Star className={`h-5 w-5 ${question.isImportant ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground'}`} />
+                <Star className={`h-5 w-5 transition-colors ${question.isImportant ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground hover:text-yellow-400'}`} />
             </Button>
         </div>
         <div className="flex flex-wrap gap-2 pt-2">

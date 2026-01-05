@@ -3,7 +3,7 @@
 
 import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
-import { Code2, List, User, LogIn, Star } from 'lucide-react';
+import { Code2, List, Star, LogIn, FilterX } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { collection, query, where } from 'firebase/firestore';
@@ -24,15 +24,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StatsCard } from '@/components/app/stats-card';
 import { DifficultyChart } from '@/components/app/difficulty-chart';
 import { StatusChart } from '@/components/app/status-chart';
+import { ImportanceChart } from '@/components/app/importance-chart';
 import { NotesOverview } from '@/components/app/notes-overview';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
+
+type FilterType = 'all' | 'solved' | 'unsolved' | 'important';
 
 export default function MyListPage() {
     const { user, loading: userLoading } = useUser();
     const firestore = useFirestore();
     const auth = getAuth();
     const { toast } = useToast();
+    const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
     const questionsQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
@@ -41,8 +45,23 @@ export default function MyListPage() {
 
     const { data: questions, isLoading: questionsLoading } = useCollection(questionsQuery);
 
+    const filteredQuestions = useMemo(() => {
+        if (!questions) return [];
+        switch (activeFilter) {
+            case 'important':
+                return questions.filter(q => q.isImportant);
+            case 'solved':
+                return questions.filter(q => q.status === 'solved');
+            case 'unsolved':
+                return questions.filter(q => q.status === 'unsolved');
+            case 'all':
+            default:
+                return questions;
+        }
+    }, [questions, activeFilter]);
+
     const stats = useMemo(() => {
-        if (!questions) return { total: 0, solved: 0, important: 0, unsolved: 0, byDifficulty: [], statusDistribution: [] };
+        if (!questions) return { total: 0, solved: 0, important: 0, unsolved: 0, byDifficulty: [], statusDistribution: [], importanceDistribution: [] };
     
         const total = questions.length;
         const solved = questions.filter(q => q.status === 'solved').length;
@@ -64,8 +83,13 @@ export default function MyListPage() {
             { name: 'Solved', value: solved, fill: 'hsl(var(--chart-2))' },
             { name: 'Unsolved', value: unsolved, fill: 'hsl(var(--chart-1))' },
         ];
+
+        const importanceDistribution = [
+            { name: 'Important', value: important, fill: 'hsl(var(--chart-4))' },
+            { name: 'Normal', value: total - important, fill: 'hsl(var(--muted))' },
+        ];
     
-        return { total, solved, important, unsolved, byDifficulty, statusDistribution };
+        return { total, solved, important, unsolved, byDifficulty, statusDistribution, importanceDistribution };
     }, [questions]);
 
     const handleLogin = async () => {
@@ -95,6 +119,15 @@ export default function MyListPage() {
             console.error("Error signing out", error);
         }
     };
+
+    const getFilterTitle = () => {
+        switch (activeFilter) {
+            case 'important': return "Important Questions";
+            case 'solved': return "Solved Questions";
+            case 'unsolved': return "Unsolved Questions";
+            default: return "Your Questions";
+        }
+    }
     
     const UserButton = () => {
         if (userLoading) {
@@ -129,8 +162,7 @@ export default function MyListPage() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -179,19 +211,46 @@ export default function MyListPage() {
             return (
                 <div className="space-y-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <StatsCard title="Total Questions" value={stats.total} icon={<List />} />
-                        <StatsCard title="Important" value={stats.important} icon={<Star />} />
-                        <StatusChart data={stats.statusDistribution} />
+                        <div onClick={() => setActiveFilter('all')} className="cursor-pointer">
+                            <StatsCard title="Total Questions" value={stats.total} icon={<List />} />
+                        </div>
+                        <div onClick={() => setActiveFilter('important')} className="cursor-pointer">
+                           <ImportanceChart data={stats.importanceDistribution} />
+                        </div>
+                        <div onClick={() => setActiveFilter(activeFilter === 'solved' ? 'all' : 'solved')} className="cursor-pointer">
+                            <StatusChart data={stats.statusDistribution} onSegmentClick={setActiveFilter} />
+                        </div>
                         <DifficultyChart data={stats.byDifficulty} />
                     </div>
                     <NotesOverview questions={questions} />
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight mb-4">Your Questions</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {questions.map((q) => (
-                                <MyListCard key={q.id} question={q} />
-                            ))}
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-bold tracking-tight">{getFilterTitle()} ({filteredQuestions.length})</h2>
+                            {activeFilter !== 'all' && (
+                                <Button variant="ghost" onClick={() => setActiveFilter('all')}>
+                                    <FilterX className="mr-2 h-4 w-4" />
+                                    Clear Filter
+                                </Button>
+                            )}
                         </div>
+                        {filteredQuestions.length > 0 ? (
+                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {filteredQuestions.map((q) => (
+                                    <MyListCard key={q.id} question={q} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center border-2 border-dashed border-muted-foreground/30 rounded-lg py-16">
+                                <h2 className="text-xl font-semibold mb-2">No questions match your filter</h2>
+                                <p className="text-muted-foreground mb-4">
+                                    Clear the filter to see all your questions.
+                                </p>
+                                <Button onClick={() => setActiveFilter('all')}>
+                                    <FilterX className="mr-2 h-4 w-4" />
+                                    Clear Filter
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -239,8 +298,8 @@ export default function MyListPage() {
             <main className="container mx-auto p-4 sm:p-6 lg:p-8">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">My Question List</h1>
-                    {user && !questionsLoading && questions && questions.length > 0 && (
-                        <Button asChild>
+                     {user && !questionsLoading && questions && questions.length > 0 && (
+                        <Button asChild variant="outline">
                             <Link href="/">
                                 <Code2 className="mr-2 h-4 w-4" />
                                 Add More Questions
