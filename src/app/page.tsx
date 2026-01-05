@@ -1,3 +1,5 @@
+import CodeQueryPage from '@/components/app/code-query-page';
+
 export default function Home() {
-  return <></>;
+  return <CodeQueryPage />;
 }
